@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bluetooth Connection</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #status {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Bluetooth Connection</h2>
+    <button id="searchButton">Search Devices</button>
+    <button id="connectButton" disabled>Connect</button>
+    <div id="status"></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var searchButton = document.getElementById('searchButton');
+      var connectButton = document.getElementById('connectButton');
+      var statusDiv = document.getElementById('status');
+
+      var device;
+      var server;
+
+      searchButton.addEventListener('click', function() {
+        statusDiv.textContent = 'Searching for devices...';
+        navigator.bluetooth.requestDevice({
+          filters: [{ services: ['battery_service'] }],
+          optionalServices: ['battery_service']
+        })
+        .then(selectedDevice => {
+          device = selectedDevice;
+          statusDiv.textContent = 'Device found: ' + device.name;
+          connectButton.disabled = false;
+        })
+        .catch(error => {
+          statusDiv.textContent = 'Error: ' + error;
+        });
+      });
+
+      connectButton.addEventListener('click', function() {
+        statusDiv.textContent = 'Connecting to ' + device.name + '...';
+        device.gatt.connect()
+          .then(deviceServer => {
+            server = deviceServer;
+            statusDiv.textContent = 'Connected to ' + device.name;
+            // 接続後の処理をここに追加
+          })
+          .catch(error => {
+            statusDiv.textContent = 'Connection failed: ' + error;
+          });
+      });
+    });
+  </script>
+</body>
+</html>
